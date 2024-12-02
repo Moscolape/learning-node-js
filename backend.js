@@ -4,7 +4,7 @@ const bodyParser = require("body-parser");
 
 const app = express();
 
-app.set('view engine', 'pug');
+app.set('view engine', 'ejs');
 app.set('views', 'views');
 
 const adminData = require("./routes/admin");
@@ -21,7 +21,6 @@ app.use((req, res, next) => {
   res
     .status(404)
     .render('not-found', {docTitle: 'Error 404'})
-    // .sendFile(path.join(__dirname, "views", "not-found.html"));
 });
 
 app.listen(4000);
