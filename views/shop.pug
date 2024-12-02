@@ -1,0 +1,21 @@
+extends layouts/main-layout.pug
+
+block styles
+  link(rel="stylesheet", href="/css/shop.css")
+
+block content 
+  main
+    if prods.length > 0
+      h1 My Products
+      p List of all the products...
+      ul
+        each product in prods
+          li
+            img.product-image(src="https://ix-marketing.imgix.net/case-study-image_chronext.png?auto=format,compress&w=1074", alt="Product 1")
+            .product-details
+              h2.product-title #{product.title}
+              p.product-price $19.99
+              p.product-description Short description of product 1.
+              a.add-to-cart-btn(href="#") Add to Cart
+    else 
+      h1 No Products
