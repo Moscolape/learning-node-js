@@ -1,0 +1,26 @@
+<%- include('../includes/head.ejs') %>
+  <link rel="stylesheet" href="/css/shop.css" />
+</head>
+<body>
+  <%- include('../includes/navigation.ejs') %>
+  <main class="centered">
+    <h1><%= product.title %></h1>
+    <ul>
+      <li>
+        <img
+          src="<%= product.imageUrl %>"
+          alt="product-watch"
+          class="product-image"
+        />
+        <div class="product-details">
+          <h2 class="product-title"><%= product.title %></h2>
+          <p class="product-price">$<%= product.price %></p>
+          <p class="product-description"><%= product.description %></p>
+          <form action="/cart" method="POST">
+            <button type="submit" class="add-to-cart-btn">Add to Cart</button>
+          </form>
+        </div>
+      </li>
+    </ul>
+  </main>
+  <%- include('../includes/end.ejs') %>

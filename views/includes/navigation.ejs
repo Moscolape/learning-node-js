@@ -6,9 +6,33 @@
       </li>
       <li class="main-header__item">
         <a
+          class="<%= path.startsWith('/products') ? 'active' : ''%>"
+          href="/products"
+          >Products</a
+        >
+      </li>
+      <li class="main-header__item">
+        <a class="<%= path === '/carts' ? 'active' : ''%>" href="/carts"
+          >Carts</a
+        >
+      </li>
+      <li class="main-header__item">
+        <a class="<%= path === '/orders' ? 'active' : ''%>" href="/orders"
+          >Orders</a
+        >
+      </li>
+      <li class="main-header__item">
+        <a
           class="<%= path === '/add-product' ? 'active' : ''%>"
           href="/add-product"
           >Add Product</a
+        >
+      </li>
+      <li class="main-header__item">
+        <a
+          class="<%= path === '/all-products' ? 'active' : ''%>"
+          href="/all-products"
+          >Store</a
         >
       </li>
     </ul>

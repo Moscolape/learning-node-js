@@ -1,0 +1,16 @@
+[
+  {
+    "id": "4378",
+    "title": "Splashscreen",
+    "imageUrl": "https://images.pexels.com/photos/674010/pexels-photo-674010.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500",
+    "description": "Just a random image",
+    "price": "20"
+  },
+  {
+    "id": "98977",
+    "title": "Ocean",
+    "imageUrl": "https://www.shutterstock.com/image-photo/calm-weather-on-sea-ocean-600nw-2212935531.jpg",
+    "description": "Just an image of the ocean",
+    "price": "25"
+  }
+]

@@ -81,7 +81,7 @@ p {
 }
 
 /* Product Grid */
-ul {
+main ul {
   display: grid;
   /* grid-column: 3; */
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -89,6 +89,10 @@ ul {
   list-style: none;
   padding: 0;
   margin: 0;
+}
+
+.centered {
+  width: 50%;
 }
 
 main li {
@@ -135,6 +139,15 @@ main li:hover {
   font-size: 0.9rem;
   color: #555;
   margin-bottom: 1rem;
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  width: 40%;
+  margin: auto;
+  justify-content: space-around;
+  border: none;
 }
 
 .add-to-cart-btn {
