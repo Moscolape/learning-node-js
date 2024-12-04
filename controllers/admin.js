@@ -1,3 +1,4 @@
+const Cart = require("../models/cart");
 const Product = require("../models/products");
 
 exports.getAddProduct = (req, res, next) => {
@@ -8,6 +9,58 @@ exports.getAddProduct = (req, res, next) => {
     productCSS: true,
     activeAddProduct: true,
   });
+};
+
+exports.editProduct = async (req, res, next) => {
+  const productId = req.query.productId;
+  if (!productId) {
+    return res.redirect("/products");
+  }
+
+  try {
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.redirect("/products");
+    }
+
+    res.render("admin/edit-product", {
+      product,
+      docTitle: `Edit ${product.title}`,
+      path: `/edit-product?productId=${productId}`,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).redirect("/products");
+  }
+};
+
+
+exports.updateProduct = async (req, res, next) => {
+  const { productId, title, imageUrl, price, description } = req.body;
+
+  try {
+    await Product.update(productId, { title, imageUrl, price, description });
+    res.redirect("/products");
+  } catch (err) {
+    console.error(err);
+    res.status(500).redirect("/products");
+  }
+};
+
+exports.deleteProduct = async (req, res, next) => {
+  const prodId = req.body.productId;
+  try {
+    const products = await Product.readFile();
+    const updatedProducts = products.filter((product) => product.id !== prodId);
+    await Product.writeFile(updatedProducts);
+
+    await Cart.removeProduct(prodId);
+
+    res.redirect("/products");
+  } catch (err) {
+    console.error("Error deleting product:", err);
+    res.redirect("/products");
+  }
 };
 
 exports.postAddProduct = (req, res, next) => {

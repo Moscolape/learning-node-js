@@ -1,6 +1,40 @@
 <%- include('../includes/head.ejs') %>
-  <link rel="stylesheet" href="/css/shop.css" />
+<link rel="stylesheet" href="/css/shop.css" />
+<link rel="stylesheet" href="/css/cart.css" />
 </head>
 <body>
   <%- include('../includes/navigation.ejs') %>
+  <main id="cart-main">
+    <div class="cart">
+      <h1>Your Cart</h1>
+      <% if (cartProducts.length > 0) { %>
+        <ul>
+          <% for (let product of cartProducts) { %>
+            <li>
+              <%= product.title %> (<%= product.qty %>) - $<%= product.price %>
+              <div class="quantity-controls">
+                <form action="/update-cart" method="POST">
+                  <input type="hidden" name="productId" value="<%= product.id %>">
+                  <input type="hidden" name="action" value="decrease">
+                  <button type="submit" <%= product.qty === 1 ? 'disabled' : '' %>>-</button>
+                </form>
+                <form action="/update-cart" method="POST">
+                  <input type="hidden" name="productId" value="<%= product.id %>">
+                  <input type="hidden" name="action" value="increase">
+                  <button type="submit">+</button>
+                </form>
+              </div>
+              <form action="/remove-from-cart" method="POST">
+                <input type="hidden" name="productId" value="<%= product.id %>">
+                <button type="submit">Remove</button>
+              </form>
+            </li>
+          <% } %>
+        </ul>
+        <p>Total Price: $<%= totalPrice %></p>
+      <% } else { %>
+        <p>Your cart is empty.</p>
+      <% } %>
+    </div>
+  </main>
   <%- include('../includes/end.ejs') %>

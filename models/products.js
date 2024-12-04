@@ -39,6 +39,28 @@ module.exports = class Product {
     await Product.writeFile(products);
   }
 
+  static async update(productId, updatedProductData) {
+    try {
+      const products = await this.readFile();
+      const productIndex = products.findIndex((p) => p.id === productId);
+  
+      if (productIndex === -1) {
+        throw new Error("Product not found");
+      }
+  
+      products[productIndex] = {
+        ...products[productIndex],
+        ...updatedProductData,
+      };
+  
+      await this.writeFile(products);
+      return products[productIndex];
+    } catch (err) {
+      console.error("Error updating product:", err);
+      throw err;
+    }
+  }  
+
   static fetchAll() {
     return this.readFile();
   }
