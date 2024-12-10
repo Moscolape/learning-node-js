@@ -92,6 +92,11 @@ main ul {
 
 .centered {
   width: 50%;
+  margin: auto;
+}
+
+.centered ul {
+  display: block;
 }
 
 main li {

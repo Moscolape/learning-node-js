@@ -1,1 +1,9 @@
-[{"id":"98977","title":"Ocean","imageUrl":"https://www.shutterstock.com/image-photo/calm-weather-on-sea-ocean-600nw-2212935531.jpg","description":"Just an image of the ocean innit?\r\n","price":"25"}]
+[
+  {
+    "id": "98977",
+    "title": "Ocean",
+    "imageUrl": "https://www.shutterstock.com/image-photo/calm-weather-on-sea-ocean-600nw-2212935531.jpg",
+    "description": "Just an image of the ocean innit?\r\n",
+    "price": "25"
+  }
+]

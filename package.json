@@ -4,7 +4,9 @@
     "ejs": "^3.1.10",
     "express": "^4.21.1",
     "express-handlebars": "3.0",
-    "pug": "^3.0.3"
+    "mysql2": "^3.11.5",
+    "pug": "^3.0.3",
+    "sequelize": "^6.37.5"
   },
   "name": "first-node-app",
   "version": "1.0.0",
@@ -12,6 +14,7 @@
   "main": "backend.js",
   "devDependencies": {
     "@types/express-handlebars": "^6.0.2",
+    "@types/sequelize": "^4.28.20",
     "nodemon": "^3.1.7"
   },
   "scripts": {

@@ -7,9 +7,9 @@
   <main id="cart-main">
     <div class="cart">
       <h1>Your Cart</h1>
-      <% if (cartProducts.length > 0) { %>
+      <% if (products.length > 0) { %>
         <ul>
-          <% for (let product of cartProducts) { %>
+          <% for (let product of products) { %>
             <li>
               <%= product.title %> (<%= product.qty %>) - $<%= product.price %>
               <div class="quantity-controls">

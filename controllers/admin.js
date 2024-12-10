@@ -1,99 +1,122 @@
-const Cart = require("../models/cart");
+// const Cart = require("../models/cart");
 const Product = require("../models/products");
 
+// @ts-ignore
 exports.getAddProduct = (req, res, next) => {
   res.render("admin/add-product", {
     docTitle: "Add Product",
     path: "/add-product",
-    formsCSS: true,
-    productCSS: true,
-    activeAddProduct: true,
   });
 };
 
+// @ts-ignore
 exports.editProduct = async (req, res, next) => {
   const productId = req.query.productId;
+
   if (!productId) {
     return res.redirect("/products");
   }
 
   try {
-    const product = await Product.findById(productId);
+    // Use Sequelize's findByPk method to fetch the product by its primary key (ID)
+    const product = await Product.findByPk(productId);
+
     if (!product) {
       return res.redirect("/products");
     }
 
+    // Render the edit-product page with the fetched product
     res.render("admin/edit-product", {
       product,
+      // @ts-ignore
       docTitle: `Edit ${product.title}`,
       path: `/edit-product?productId=${productId}`,
     });
   } catch (err) {
-    console.error(err);
+    console.error("Error fetching product for editing:", err);
     res.status(500).redirect("/products");
   }
 };
 
-
-exports.updateProduct = async (req, res, next) => {
-  const { productId, title, imageUrl, price, description } = req.body;
+// @ts-ignore
+exports.updateProduct = async (req, res) => {
+  const { productId } = req.body;
+  const updatedProductData = req.body;
 
   try {
-    await Product.update(productId, { title, imageUrl, price, description });
-    res.redirect("/products");
+    const product = await Product.findByPk(productId);
+    if (!product) {
+      throw new Error("Product not found");
+    }
+
+    await product.update(updatedProductData);
+    console.log("Product updated:", product);
+
+    return res.redirect("/");
   } catch (err) {
-    console.error(err);
-    res.status(500).redirect("/products");
+    console.error("Error updating product:", err);
+    return res.status(500).json({ message: "Error updating product", error: err.message });
   }
 };
 
-exports.deleteProduct = async (req, res, next) => {
-  const prodId = req.body.productId;
+
+// @ts-ignore
+exports.deleteProduct = async (req, res) => {
+  const { productId } = req.body; 
+
   try {
-    const products = await Product.readFile();
-    const updatedProducts = products.filter((product) => product.id !== prodId);
-    await Product.writeFile(updatedProducts);
-
-    await Cart.removeProduct(prodId);
-
-    res.redirect("/products");
+    const result = await Product.destroy({ where: { id: productId } });
+    if (result) {
+      console.log(`Product with ID ${productId} deleted.`);
+      return res.redirect("/");
+    } else {
+      console.log("Product not found.");
+      return res.status(404).json({ message: "Product not found" });
+    }
   } catch (err) {
     console.error("Error deleting product:", err);
-    res.redirect("/products");
+    return res.status(500).json({ message: "Error deleting product", error: err.message });
   }
 };
 
-exports.postAddProduct = (req, res, next) => {
-  const title = req.body.title;
-  const imageUrl = req.body.imageUrl;
-  const description = req.body.description;
-  const price = req.body.price;
 
-  const product = new Product(title, imageUrl, description, price);
-  product.save();
-  res.redirect("/");
+// @ts-ignore
+exports.postAddProduct = async (req, res) => {
+  try {
+    const { title, imageUrl, price, description } = req.body;
+
+    const product = await Product.create({
+      title,
+      imageUrl,
+      price,
+      description,
+      UserId: req.user.id
+    });
+
+    console.log("Product created:", product);
+
+    return res.status(201).redirect("/");
+  } catch (err) {
+    console.error("Error saving product:", err);
+    return res
+      .status(500)
+      .json({ message: "Error saving product", error: err.message });
+  }
 };
 
-exports.getProducts = async (req, res, next) => {
+// @ts-ignore
+exports.getProducts = async (req, res) => {
   try {
-    const products = await Product.fetchAll();
-    res.render("admin/all-products", {
-      prods: products,
+    const products = await Product.findAll();
+
+    return res.render("admin/all-products", {
+      products,
       docTitle: "All Products",
       path: "/all-products",
-      hasProduct: products.length > 0,
-      activeShop: true,
-      productCSS: true,
+      hasProduct: products.length > 0
     });
   } catch (err) {
-    console.log(err);
-    res.render("admin/all-products", {
-      prods: [],
-      docTitle: "All Products",
-      path: "/all-products",
-      hasProduct: false,
-      activeShop: false,
-      productCSS: false,
-    });
+    console.error("Error fetching products:", err);
+    return res.status(500).json({ message: "Error fetching products" });
   }
 };
