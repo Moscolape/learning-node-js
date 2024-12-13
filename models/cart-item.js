@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
 const sequelize = require('../utils/database');
-const Cart = require('./cart');
+// const Cart = require('./cart');
 
 const CartItem = sequelize.define('CartItem', {
   id: {

@@ -22,4 +22,19 @@ const User = sequelize.define('User', {
   },
 });
 
+// Custom method to get or create a cart
+
+// @ts-ignore
+User.prototype.getCart = async function () {
+  // @ts-ignore
+  let cart = await this.getCarts(); // Sequelize's auto-generated method
+  if (!cart.length) {
+    // @ts-ignore
+    cart = await this.createCart(); // Create a cart if none exists
+  } else {
+    cart = cart[0]; // Use the first cart if one already exists
+  }
+  return cart;
+};
+
 module.exports = User;

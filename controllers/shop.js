@@ -64,24 +64,30 @@ exports.getIndex = async (req, res) => {
 };
 
 // @ts-ignore
-exports.getCart = (req, res, next) => {
-  req.user
-    .getCart()
-    .then((cart) =>
-      cart
-        .getProducts()
-        .then((products) => {
-          res.render("shop/cart", {
-            products,
-            totalPrice: cart.totalPrice,
-            docTitle: "Your Cart",
-            path: "/carts",
-          });
-        })
+exports.getCart = async (req, res, next) => {
+  try {
+    const cart = await req.user.getCart();
+    const products = await cart.getProducts();
 
-        .catch((err) => console.log(err))
-    )
-    .catch((err) => console.log(err));
+    const cartProducts = products.map(product => ({
+      id: product.id,
+      title: product.title,
+      price: product.price,
+      qty: product.cartItem.qty
+    }));
+
+    const totalPrice = cartProducts.reduce((sum, product) => sum + product.price * product.qty, 0);
+
+    res.render("shop/cart", {
+      products: cartProducts,
+      totalPrice,
+      path: '/carts',
+      docTitle: 'Your Carts'
+    });
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
 };
 
 // @ts-ignore
@@ -100,36 +106,33 @@ exports.updateCart = async (req, res, next) => {
 // @ts-ignore
 exports.addToCart = async (req, res, next) => {
   const prodId = req.body.productId;
-  let fetchedCart;
-  let newQuantity = 1;
-  req.user
-    .getCart()
-    .then(cart => {
-      fetchedCart = cart;
-      return cart.getProducts({ where: { id: prodId } });
-    })
-    .then(products => {
-      let product;
-      if (products.length > 0) {
-        product = products[0];
+  const action = req.body.action;
+
+  try {
+    const cart = await req.user.getCart();
+    const products = await cart.getProducts({ where: { id: prodId } });
+    const product = products[0];
+
+    if (product) {
+      let newQty = product.cartItem.qty;
+
+      if (action === "increase") {
+        newQty++;
+      } else if (action === "decrease" && newQty > 1) {
+        newQty--;
       }
 
-      if (product) {
-        const oldQuantity = product.cartItem.quantity;
-        newQuantity = oldQuantity + 1;
-        return product;
-      }
-      return Product.findByPk(prodId);
-    })
-    .then(product => {
-      return fetchedCart.addProduct(product, {
-        through: { quantity: newQuantity }
-      });
-    })
-    .then(() => {
-      res.redirect('/carts');
-    })
-    .catch(err => console.log(err));
+      await product.cartItem.update({ qty: newQty });
+    } else if (action === "increase") {
+      const productToAdd = await Product.findByPk(prodId);
+      await cart.addProduct(productToAdd, { through: { qty: 1 } });
+    }
+
+    res.redirect("/carts");
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
 };
 
 // @ts-ignore

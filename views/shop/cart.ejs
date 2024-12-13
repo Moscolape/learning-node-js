@@ -13,12 +13,12 @@
             <li>
               <%= product.title %> (<%= product.qty %>) - $<%= product.price %>
               <div class="quantity-controls">
-                <form action="/update-cart" method="POST">
+                <form action="/carts" method="POST">
                   <input type="hidden" name="productId" value="<%= product.id %>">
                   <input type="hidden" name="action" value="decrease">
                   <button type="submit" <%= product.qty === 1 ? 'disabled' : '' %>>-</button>
                 </form>
-                <form action="/update-cart" method="POST">
+                <form action="/carts" method="POST">
                   <input type="hidden" name="productId" value="<%= product.id %>">
                   <input type="hidden" name="action" value="increase">
                   <button type="submit">+</button>
@@ -34,7 +34,7 @@
         <p>Total Price: $<%= totalPrice %></p>
       <% } else { %>
         <p>Your cart is empty.</p>
-      <% } %>
+      <% } %>      
     </div>
   </main>
   <%- include('../includes/end.ejs') %>
