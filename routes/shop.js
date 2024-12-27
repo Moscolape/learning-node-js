@@ -20,7 +20,7 @@ router.get("/carts", shopController.getCart);
 router.post("/carts", shopController.addToCart);
 
 // @ts-ignore
-router.post("/update-cart", shopController.updateCart);
+// router.post("/update-cart", shopController.updateCart);
 
 // @ts-ignore
 router.post("/remove-from-cart", shopController.removeFromCart);

@@ -11,7 +11,7 @@ router.get("/add-product", adminController.getAddProduct);
 router.get("/edit-product", adminController.editProduct);
 
 // @ts-ignore
-router.post('/edit-product', adminController.updateProduct);
+router.post('/edit-product/:id', adminController.updateProduct);
 
 // @ts-ignore
 router.post("/delete-product", adminController.deleteProduct);

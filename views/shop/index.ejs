@@ -23,7 +23,7 @@
                 <p class="product-description"><%= product.description %></p>
                 <form action="/carts" method="POST">
                   <button type="submit" class="add-to-cart-btn">Add to Cart</button>
-                  <input type="hidden" name="productId" value="<%= product.id %>">
+                  <input type="hidden" name="productId" value="<%= product._id %>">
                 </form>              
               </div>
             </li>

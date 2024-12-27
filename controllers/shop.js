@@ -1,10 +1,9 @@
 const Product = require("../models/products");
-// const Cart = require("../models/cart");
 
 // @ts-ignore
 exports.getAllProducts = async (req, res) => {
   try {
-    const products = await Product.findAll();
+    const products = await Product.fetchAll();
 
     return res.render("shop/product-list", {
       products,
@@ -23,10 +22,7 @@ exports.getThisProduct = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const product = await Product.findByPk(id);
-
-    console.log(id);
-    console.log(product);
+    const product = await Product.findById(id);
 
     if (!product) {
       return res.status(404).render("not-found", {
@@ -37,7 +33,7 @@ exports.getThisProduct = async (req, res) => {
 
     return res.render("shop/product-details", {
       product,
-      docTitle: product.dataValues.title,
+      docTitle: product.title,
       path: `/products/${id}`,
     });
   } catch (err) {
@@ -49,7 +45,7 @@ exports.getThisProduct = async (req, res) => {
 // @ts-ignore
 exports.getIndex = async (req, res) => {
   try {
-    const products = await Product.findAll();
+    const products = await Product.fetchAll();
 
     return res.render("shop/index", {
       products,
@@ -64,53 +60,42 @@ exports.getIndex = async (req, res) => {
 };
 
 // @ts-ignore
-exports.getCart = async (req, res, next) => {
+exports.getCart = async (req, res) => {
   try {
     const cart = await req.user.getCart();
     const products = await cart.getProducts();
 
-    const cartProducts = products.map(product => ({
+    const cartProducts = products.map((product) => ({
       id: product.id,
       title: product.title,
       price: product.price,
-      qty: product.cartItem.qty
+      qty: product.cartItem.qty,
     }));
 
-    const totalPrice = cartProducts.reduce((sum, product) => sum + product.price * product.qty, 0);
+    const totalPrice = cartProducts.reduce(
+      (sum, product) => sum + product.price * product.qty,
+      0
+    );
 
     res.render("shop/cart", {
       products: cartProducts,
       totalPrice,
-      path: '/carts',
-      docTitle: 'Your Carts'
+      path: "/carts",
+      docTitle: "Your Cart",
     });
   } catch (err) {
-    console.error(err);
-    next(err);
+    console.error("Error fetching cart:", err);
+    res.status(500).json({ message: "Error fetching cart" });
   }
 };
 
 // @ts-ignore
-exports.updateCart = async (req, res, next) => {
-  // const prodId = req.body.productId;
-  // const action = req.body.action;
-  // const product = await Product.findById(prodId);
-  // // @ts-ignore
-  // if (product) {
-  //   // @ts-ignore
-  //   await Cart.addProduct(prodId, product.price, action);
-  // }
-  // res.redirect("/carts");
-};
-
-// @ts-ignore
-exports.addToCart = async (req, res, next) => {
-  const prodId = req.body.productId;
-  const action = req.body.action;
+exports.addToCart = async (req, res) => {
+  const { productId, action } = req.body;
 
   try {
     const cart = await req.user.getCart();
-    const products = await cart.getProducts({ where: { id: prodId } });
+    const products = await cart.getProducts({ where: { id: productId } });
     const product = products[0];
 
     if (product) {
@@ -124,45 +109,55 @@ exports.addToCart = async (req, res, next) => {
 
       await product.cartItem.update({ qty: newQty });
     } else if (action === "increase") {
-      const productToAdd = await Product.findByPk(prodId);
+      const productToAdd = await Product.findById(productId);
       await cart.addProduct(productToAdd, { through: { qty: 1 } });
     }
 
     res.redirect("/carts");
   } catch (err) {
-    console.error(err);
-    next(err);
+    console.error("Error updating cart:", err);
+    res.status(500).json({ message: "Error updating cart" });
   }
 };
 
 // @ts-ignore
-exports.removeFromCart = async (req, res, next) => {
-  const prodId = req.body.productId;
-  req.user
-    .getCart()
-    .then(cart => {
-      return cart.getProducts({ where: { id: prodId } });
-    })
-    .then(products => {
+exports.removeFromCart = async (req, res) => {
+  const { productId } = req.body;
+
+  try {
+    const cart = await req.user.getCart();
+    const products = await cart.getProducts({ where: { id: productId } });
+
+    if (products.length > 0) {
       const product = products[0];
-      return product.cartItem.destroy();
-    })
-    .then(result => {
-      res.redirect('/cart');
-    })
-    .catch(err => console.log(err));
+      await product.cartItem.destroy();
+    }
+
+    res.redirect("/carts");
+  } catch (err) {
+    console.error("Error removing product from cart:", err);
+    res.status(500).json({ message: "Error removing product from cart" });
+  }
 };
 
 // @ts-ignore
-exports.getOrders = (req, res, next) => {
-  res.render("shop/orders", {
-    docTitle: "Your Orders",
-    path: "/orders",
-  });
+exports.getOrders = async (req, res) => {
+  try {
+    const orders = await req.user.getOrders({ include: ["products"] });
+
+    res.render("shop/orders", {
+      docTitle: "Your Orders",
+      path: "/orders",
+      orders,
+    });
+  } catch (err) {
+    console.error("Error fetching orders:", err);
+    res.status(500).json({ message: "Error fetching orders" });
+  }
 };
 
 // @ts-ignore
-exports.getCheckout = (req, res, next) => {
+exports.getCheckout = (req, res) => {
   res.render("shop/checkout", {
     docTitle: "Checkout",
     path: "/checkout",

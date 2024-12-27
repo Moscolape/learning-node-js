@@ -2,68 +2,60 @@ const path = require("path");
 const express = require("express");
 const bodyParser = require("body-parser");
 
-const app = express();
+const { connectToMongoDB } = require("./utils/mongodb"); // Import the function
 const errorController = require("./controllers/error");
 
-const sequelize = require("./utils/database");
+const app = express();
 
 app.set("view engine", "ejs");
 app.set("views", "views");
 
+// Middleware and routes
 const adminRoute = require("./routes/admin");
 const shopRoute = require("./routes/shop");
-
-const Product = require("./models/products");
-const User = require("./models/user");
-const CartItem = require("./models/cart-item");
-const Cart = require("./models/cart");
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use((req, res, next) => {
-  User.findByPk(1)
-    .then((user) => {
-      // @ts-ignore
-      req.user = user;
-      next();
-    })
-    .catch((err) => console.log(err));
-});
-
-app.use(adminRoute);
-app.use(shopRoute);
-
-app.use(errorController.get404);
-
-// define relations
-Product.belongsTo(User, { constraints: true, onDelete: "CASCADE" });
-User.hasMany(Product);
-
-User.hasOne(Cart);
-Cart.belongsTo(User);
-
-Cart.belongsToMany(Product, {through: CartItem});
-Product.belongsToMany(Cart, {through: CartItem});
-
-sequelize
-  // .sync({force: true})
-  .sync()
-  .then((result) => {
-    return User.findByPk(1);
-  })
-  .then((user) => {
-    if (!user) {
-      User.create({ name: "Moses", email: "moscolian@gmail.com" });
-    }
-    return user;
-  })
-  .then(user => {
+// MongoDB Connection and Middleware
+connectToMongoDB()
+  .then((db) => {
+    // Attach the database reference to the request object
     // @ts-ignore
-    return user.createCart();
+    app.use((req, res, next) => {
+      // @ts-ignore
+      req.db = db;
+      next();
+    });
+
+    // Example user-fetching middleware (replace with your logic)
+    // @ts-ignore
+    app.use(async (req, res, next) => {
+      try {
+        // @ts-ignore
+        const user = await req.db
+          .collection("users")
+          .findOne({ _id: "user-id" }); // Replace "user-id" with actual logic
+        // @ts-ignore
+        req.user = user;
+        next();
+      } catch (err) {
+        console.error(err);
+        next(err);
+      }
+    });
+
+    app.use(adminRoute);
+    app.use(shopRoute);
+
+    // Define routes or start the server
+    app.use(errorController.get404);
+
+    // Start the server
+    app.listen(4000, () => {
+      console.log("Server is running on port 4000");
+    });
   })
-  .then((cart) => {
-    console.log(cart);
-    app.listen(4000);
-  })
-  .catch((err) => console.log(err));
+  .catch((err) => {
+    console.error("Failed to initialize application", err);
+  });
