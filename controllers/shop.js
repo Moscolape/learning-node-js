@@ -62,98 +62,82 @@ exports.getIndex = async (req, res) => {
 // @ts-ignore
 exports.getCart = async (req, res) => {
   try {
-    const cart = await req.user.getCart();
-    const products = await cart.getProducts();
+    const cartProducts = await req.user.getCart();
 
-    const cartProducts = products.map((product) => ({
-      id: product.id,
-      title: product.title,
-      price: product.price,
-      qty: product.cartItem.qty,
-    }));
-
-    const totalPrice = cartProducts.reduce(
-      (sum, product) => sum + product.price * product.qty,
-      0
-    );
+    let totalPrice = 0;
+    cartProducts.forEach(product => {
+      totalPrice += product.price * product.qty;
+    });
 
     res.render("shop/cart", {
-      products: cartProducts,
-      totalPrice,
       path: "/carts",
       docTitle: "Your Cart",
+      products: cartProducts,
+      totalPrice,
     });
   } catch (err) {
     console.error("Error fetching cart:", err);
-    res.status(500).json({ message: "Error fetching cart" });
+    res.status(500).json({ message: "Error fetching cart." });
   }
 };
+
 
 // @ts-ignore
 exports.addToCart = async (req, res) => {
-  const { productId, action } = req.body;
+  const prodId = req.body.productId;
 
   try {
-    const cart = await req.user.getCart();
-    const products = await cart.getProducts({ where: { id: productId } });
-    const product = products[0];
-
-    if (product) {
-      let newQty = product.cartItem.qty;
-
-      if (action === "increase") {
-        newQty++;
-      } else if (action === "decrease" && newQty > 1) {
-        newQty--;
-      }
-
-      await product.cartItem.update({ qty: newQty });
-    } else if (action === "increase") {
-      const productToAdd = await Product.findById(productId);
-      await cart.addProduct(productToAdd, { through: { qty: 1 } });
+    const product = await Product.findById(prodId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found." });
     }
 
+    await req.user.addToCart(product);
     res.redirect("/carts");
   } catch (err) {
-    console.error("Error updating cart:", err);
-    res.status(500).json({ message: "Error updating cart" });
+    console.error("Error adding to cart:", err);
+    res.status(500).json({ message: "Error adding to cart." });
   }
 };
 
+
 // @ts-ignore
-exports.removeFromCart = async (req, res) => {
+exports.removeCartItem = async (req, res) => {
   const { productId } = req.body;
 
   try {
-    const cart = await req.user.getCart();
-    const products = await cart.getProducts({ where: { id: productId } });
+    // Use the logged-in user to call the removeFromCart method
+    await req.user.removeFromCart(productId);
 
-    if (products.length > 0) {
-      const product = products[0];
-      await product.cartItem.destroy();
-    }
-
+    // Redirect to the cart page after removing the item
     res.redirect("/carts");
   } catch (err) {
-    console.error("Error removing product from cart:", err);
-    res.status(500).json({ message: "Error removing product from cart" });
+    console.error("Error removing item from cart:", err);
+    res.status(500).json({ message: "Error removing item from cart." });
   }
 };
 
-// @ts-ignore
-exports.getOrders = async (req, res) => {
-  try {
-    const orders = await req.user.getOrders({ include: ["products"] });
+exports.postOrder = (req, res, next) => {
+  let fetchedCart;
+  req.user
+    .addOrder()
+    .then(result => {
+      res.redirect('/orders');
+    })
+    .catch(err => console.log(err));
+};
 
-    res.render("shop/orders", {
-      docTitle: "Your Orders",
-      path: "/orders",
-      orders,
-    });
-  } catch (err) {
-    console.error("Error fetching orders:", err);
-    res.status(500).json({ message: "Error fetching orders" });
-  }
+exports.getOrders = (req, res, next) => {
+  req.user
+    .getOrders()
+    .then(orders => {
+      res.render('shop/orders', {
+        path: '/orders',
+        docTitle: 'Your Orders',
+        orders: orders
+      });
+    })
+    .catch(err => console.log(err));
 };
 
 // @ts-ignore

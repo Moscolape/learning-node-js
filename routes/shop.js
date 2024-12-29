@@ -20,10 +20,10 @@ router.get("/carts", shopController.getCart);
 router.post("/carts", shopController.addToCart);
 
 // @ts-ignore
-// router.post("/update-cart", shopController.updateCart);
+router.post("/remove-from-cart", shopController.removeCartItem);
 
 // @ts-ignore
-router.post("/remove-from-cart", shopController.removeFromCart);
+router.post("/create-order", shopController.postOrder);
 
 // @ts-ignore
 router.get("/orders", shopController.getOrders);

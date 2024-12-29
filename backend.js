@@ -1,8 +1,11 @@
+// @ts-nocheck
 const path = require("path");
 const express = require("express");
 const bodyParser = require("body-parser");
 
-const { connectToMongoDB } = require("./utils/mongodb"); // Import the function
+const { connectToMongoDB } = require("./utils/mongodb");
+const User = require("./models/user");
+
 const errorController = require("./controllers/error");
 
 const app = express();
@@ -20,7 +23,6 @@ app.use(express.static(path.join(__dirname, "public")));
 // MongoDB Connection and Middleware
 connectToMongoDB()
   .then((db) => {
-    // Attach the database reference to the request object
     // @ts-ignore
     app.use((req, res, next) => {
       // @ts-ignore
@@ -28,22 +30,31 @@ connectToMongoDB()
       next();
     });
 
-    // Example user-fetching middleware (replace with your logic)
     // @ts-ignore
     app.use(async (req, res, next) => {
       try {
-        // @ts-ignore
-        const user = await req.db
-          .collection("users")
-          .findOne({ _id: "user-id" }); // Replace "user-id" with actual logic
-        // @ts-ignore
-        req.user = user;
+        const user = await User.findById("676e9e0075593858b2dc6fb9");
+        req.user = new User(user.name, user.email, user._id, user.cart);
         next();
       } catch (err) {
-        console.error(err);
+        console.error("Error setting user in request:", err);
         next(err);
       }
     });
+
+    // app.use((req, res, next) => {
+    //   if (req.session.user) {
+    //     User.findById(req.session.user._id)
+    //       .then((user) => {
+    //         req.user = user;
+    //         next();
+    //       })
+    //       .catch((err) => console.log(err));
+    //   } else {
+    //     next();
+    //   }
+    // });
+    
 
     app.use(adminRoute);
     app.use(shopRoute);

@@ -2,26 +2,20 @@ const { ObjectId } = require("mongodb");
 const { getDb } = require("../utils/mongodb");
 
 class Product {
-  constructor(title, price, description, imageUrl, id) {
+  constructor(title, price, description, imageUrl, id, userId) {
     this.title = title;
     this.price = price;
     this.description = description;
     this.imageUrl = imageUrl;
     // @ts-ignore
     this._id = id ? new require("mongodb").ObjectId(id) : null;
+    this.userId = userId;
   }
 
   save() {
     const db = getDb();
-    if (this._id) {
-      // Update existing product
-      return db
-        .collection("products")
-        .updateOne({ _id: this._id }, { $set: this });
-    } else {
-      // Insert new product
-      return db.collection("products").insertOne(this);
-    }
+    // Insert new product
+    return db.collection("products").insertOne(this);
   }
 
   static fetchAll() {
@@ -32,17 +26,17 @@ class Product {
   static findById(prodId) {
     const db = getDb();
     console.log(prodId);
-    return db
-      .collection("products")
-      .findOne({ _id: new ObjectId(prodId) });
+    return db.collection("products").findOne({ _id: new ObjectId(prodId) });
   }
 
   static deleteById(prodId) {
     const db = getDb();
-    return db
-      .collection("products")
-      // @ts-ignore
-      .deleteOne({ _id: new ObjectId(prodId) });
+    return (
+      db
+        .collection("products")
+        // @ts-ignore
+        .deleteOne({ _id: new ObjectId(prodId) })
+    );
   }
 
   // Update product by id
@@ -50,10 +44,7 @@ class Product {
     const db = getDb();
     return db
       .collection("products")
-      .updateOne(
-        { _id: new ObjectId(prodId) },
-        { $set: updatedData }
-      );
+      .updateOne({ _id: new ObjectId(prodId) }, { $set: updatedData });
   }
 }
 

@@ -24,7 +24,7 @@ exports.postAddProduct = async (req, res) => {
     const { title, imageUrl, price, description } = req.body;
 
     // Create a new product instance and save it using the MongoDB model
-    const product = new Product(title, price, description, imageUrl);
+    const product = new Product(title, price, description, imageUrl, null, req.user._id);
     await product.save();
 
     console.log("Product created:", product);
@@ -75,7 +75,9 @@ exports.editProduct = async (req, res, next) => {
 
 exports.updateProduct = async (req, res) => {
   const { id } = req.params;
-  const updatedData = req.body;
+  const { title, imageUrl, price, description } = req.body;
+
+  const updatedData = { title, imageUrl, price, description };
 
   try {
     const result = await Product.updateById(id, updatedData);
@@ -84,7 +86,7 @@ exports.updateProduct = async (req, res) => {
       return res.status(404).json({ message: "Product not found or no changes made" });
     }
 
-    res.status(200).redirect("/");
+    res.status(200).redirect("/all-products");
   } catch (err) {
     console.error("Error updating product:", err);
     res.status(500).json({ message: "Error updating product" });
@@ -92,8 +94,9 @@ exports.updateProduct = async (req, res) => {
 };
 
 
+
 exports.deleteProduct = async (req, res) => {
-  const { id } = req.params;
+  const id = req.body.productId;
 
   try {
     const result = await Product.deleteById(id);
@@ -105,7 +108,7 @@ exports.deleteProduct = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    res.status(200).redirect("/");
+    res.status(200).redirect("/all-products");
   } catch (err) {
     console.error("Error deleting product:", err);
     res.status(500).json({ message: "Error deleting product" });
