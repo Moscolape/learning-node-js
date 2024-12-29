@@ -8,14 +8,14 @@
     <ul>
       <li>
         <img
-          src="<%= product.imageUrl %>"
+          src="<%= product[0].imageUrl %>"
           alt="product-watch"
           class="product-image"
         />
         <div class="product-details">
-          <h2 class="product-title"><%= product.title %></h2>
-          <p class="product-price">$<%= product.price %></p>
-          <p class="product-description"><%= product.description %></p>
+          <h2 class="product-title"><%= product[0].title %></h2>
+          <p class="product-price">$<%= product[0].price %></p>
+          <p class="product-description"><%= product[0].description %></p>
           <form action="/carts" method="POST">
             <button type="submit" class="add-to-cart-btn">Add to Cart</button>
             <input type="hidden" name="productId" value="<%= product.id %>">

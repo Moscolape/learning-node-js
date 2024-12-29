@@ -1,10 +1,11 @@
-const Product = require("../models/products"); // Import the Product model
+const Product = require("../models/products");
 
+
+// @ts-ignore
 // @ts-ignore
 exports.getProducts = async (req, res) => {
   try {
-    // Fetch all products using the MongoDB model's fetchAll method
-    const products = await Product.fetchAll();
+    const products = await Product.find();
 
     return res.render("admin/all-products", {
       products,
@@ -18,13 +19,20 @@ exports.getProducts = async (req, res) => {
   }
 };
 
+
 // @ts-ignore
 exports.postAddProduct = async (req, res) => {
   try {
     const { title, imageUrl, price, description } = req.body;
 
     // Create a new product instance and save it using the MongoDB model
-    const product = new Product(title, price, description, imageUrl, null, req.user._id);
+    const product = new Product({
+      title,
+      price,
+      description,
+      imageUrl,
+      userId: req.user._id,
+    });
     await product.save();
 
     console.log("Product created:", product);
@@ -39,6 +47,7 @@ exports.postAddProduct = async (req, res) => {
 };
 
 // @ts-ignore
+// @ts-ignore
 exports.getAddProduct = (req, res, next) => {
   res.render("admin/add-product", {
     docTitle: "Add Product",
@@ -46,43 +55,54 @@ exports.getAddProduct = (req, res, next) => {
   });
 };
 
+// @ts-ignore
 exports.editProduct = async (req, res, next) => {
-  const productId = req.query.productId;
+  const productId = req.params.productId;
+  console.log("Product ID:", productId);
+
 
   if (!productId) {
-    return res.redirect("/products");
+    return res.redirect("/all-products");
   }
 
   try {
     const product = await Product.findById(productId);
 
-    if (!product) {
-      return res.redirect("/products");
-    }
+    console.log(product)
+
+    // if (!product) {
+    //   return res.redirect("/all-products");
+    // }
 
     // Render the edit-product page with the fetched product
     res.render("admin/edit-product", {
       product,
       // @ts-ignore
-      docTitle: `Edit ${product.title}`,
-      path: `/edit-product?productId=${productId}`,
+      docTitle: `Edit ${product[0].title}`,
+      path: `/edit-product/${productId}`,
     });
   } catch (err) {
     console.error("Error fetching product for editing:", err);
-    res.status(500).redirect("/products");
+    res.status(500).redirect("/all-products");
   }
 };
 
 exports.updateProduct = async (req, res) => {
-  const { id } = req.params;
+  console.log("Update product function called");
+  const { productId } = req.params; // Use `req.params` to get the `productId` from the URL
   const { title, imageUrl, price, description } = req.body;
+
+  console.log('Product ID:', productId);
+  console.log('Form Data:', req.body);
 
   const updatedData = { title, imageUrl, price, description };
 
   try {
-    const result = await Product.updateById(id, updatedData);
+    const result = await Product.findByIdAndUpdate(productId, updatedData, { new: true });
 
-    if (result.modifiedCount === 0) {
+    console.log('Update result:', result);
+
+    if (!result) {
       return res.status(404).json({ message: "Product not found or no changes made" });
     }
 
@@ -94,16 +114,13 @@ exports.updateProduct = async (req, res) => {
 };
 
 
-
 exports.deleteProduct = async (req, res) => {
-  const id = req.body.productId;
+  const { productId } = req.body;
 
   try {
-    const result = await Product.deleteById(id);
+    const result = await Product.findByIdAndDelete(productId);
 
-    console.log(id);
-    console.log(result);
-
+    // @ts-ignore
     if (result.deletedCount === 0) {
       return res.status(404).json({ message: "Product not found" });
     }

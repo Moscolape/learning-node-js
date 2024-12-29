@@ -1,10 +1,10 @@
 const Product = require("../models/products");
 
-// @ts-ignore
+// Fetch all products
 exports.getAllProducts = async (req, res) => {
   try {
-    const products = await Product.fetchAll();
-
+    const products = await Product.find();
+    
     return res.render("shop/product-list", {
       products,
       docTitle: "Products",
@@ -17,12 +17,11 @@ exports.getAllProducts = async (req, res) => {
   }
 };
 
-// @ts-ignore
+// Fetch a single product by ID
 exports.getThisProduct = async (req, res) => {
   try {
     const { id } = req.params;
-
-    const product = await Product.findById(id);
+    const product = await Product.findById(id); // Mongoose's findById replaces the custom method
 
     if (!product) {
       return res.status(404).render("not-found", {
@@ -42,11 +41,10 @@ exports.getThisProduct = async (req, res) => {
   }
 };
 
-// @ts-ignore
+// Fetch all products for the index page
 exports.getIndex = async (req, res) => {
   try {
-    const products = await Product.fetchAll();
-
+    const products = await Product.find();
     return res.render("shop/index", {
       products,
       docTitle: "Shop",
@@ -59,17 +57,18 @@ exports.getIndex = async (req, res) => {
   }
 };
 
-// @ts-ignore
+// Fetch cart items
 exports.getCart = async (req, res) => {
   try {
     const cartProducts = await req.user.getCart();
-
+    console.log(cartProducts);
+    
     let totalPrice = 0;
     cartProducts.forEach(product => {
-      totalPrice += product.price * product.qty;
+      totalPrice += product.price * product.quantity;
     });
 
-    res.render("shop/cart", {
+    return res.render("shop/cart", {
       path: "/carts",
       docTitle: "Your Cart",
       products: cartProducts,
@@ -77,70 +76,75 @@ exports.getCart = async (req, res) => {
     });
   } catch (err) {
     console.error("Error fetching cart:", err);
-    res.status(500).json({ message: "Error fetching cart." });
+    return res.status(500).json({ message: "Error fetching cart." });
   }
 };
 
-
-// @ts-ignore
+// Add product to cart
 exports.addToCart = async (req, res) => {
-  const prodId = req.body.productId;
+  const { productId } = req.body;
+
+  console.log("Product ID received:", productId);  // Log productId to ensure it's not undefined
 
   try {
-    const product = await Product.findById(prodId);
+    const product = await Product.findById(productId);
+    console.log(product);
+
     if (!product) {
       return res.status(404).json({ message: "Product not found." });
     }
 
-    await req.user.addToCart(product);
-    res.redirect("/carts");
+    // Ensure productId is passed correctly to addToCart method
+    await req.user.addToCart(product);  // Assumes addToCart method is implemented in the User model
+    return res.redirect("/carts");
   } catch (err) {
     console.error("Error adding to cart:", err);
-    res.status(500).json({ message: "Error adding to cart." });
+    return res.status(500).json({ message: "Error adding to cart." });
   }
 };
 
 
-// @ts-ignore
+// Remove item from cart
 exports.removeCartItem = async (req, res) => {
   const { productId } = req.body;
 
   try {
-    // Use the logged-in user to call the removeFromCart method
-    await req.user.removeFromCart(productId);
-
-    // Redirect to the cart page after removing the item
-    res.redirect("/carts");
+    await req.user.removeFromCart(productId); // Assumes `removeFromCart` is implemented in the User model
+    return res.redirect("/carts");
   } catch (err) {
     console.error("Error removing item from cart:", err);
-    res.status(500).json({ message: "Error removing item from cart." });
+    return res.status(500).json({ message: "Error removing item from cart." });
   }
 };
 
-exports.postOrder = (req, res, next) => {
-  let fetchedCart;
-  req.user
-    .addOrder()
-    .then(result => {
-      res.redirect('/orders');
-    })
-    .catch(err => console.log(err));
+// Post an order
+exports.postOrder = async (req, res) => {
+  try {
+    await req.user.addOrder();
+    
+    return res.redirect("/orders");
+  } catch (err) {
+    console.error("Error creating order:", err);
+    return res.status(500).json({ message: "Error creating order." });
+  }
 };
 
-exports.getOrders = (req, res, next) => {
-  req.user
-    .getOrders()
-    .then(orders => {
-      res.render('shop/orders', {
-        path: '/orders',
-        docTitle: 'Your Orders',
-        orders: orders
-      });
-    })
-    .catch(err => console.log(err));
+// Fetch all orders
+exports.getOrders = async (req, res) => {
+  try {
+    const orders = await req.user.getOrders(); // Assumes `getOrders` is implemented in the User model
+    return res.render("shop/orders", {
+      path: "/orders",
+      docTitle: "Your Orders",
+      orders,
+    });
+  } catch (err) {
+    console.error("Error fetching orders:", err);
+    return res.status(500).json({ message: "Error fetching orders." });
+  }
 };
 
-// @ts-ignore
+// Checkout page
 exports.getCheckout = (req, res) => {
   res.render("shop/checkout", {
     docTitle: "Checkout",

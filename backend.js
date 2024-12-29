@@ -34,26 +34,13 @@ connectToMongoDB()
     app.use(async (req, res, next) => {
       try {
         const user = await User.findById("676e9e0075593858b2dc6fb9");
-        req.user = new User(user.name, user.email, user._id, user.cart);
+        req.user = user;
         next();
       } catch (err) {
         console.error("Error setting user in request:", err);
         next(err);
       }
     });
-
-    // app.use((req, res, next) => {
-    //   if (req.session.user) {
-    //     User.findById(req.session.user._id)
-    //       .then((user) => {
-    //         req.user = user;
-    //         next();
-    //       })
-    //       .catch((err) => console.log(err));
-    //   } else {
-    //     next();
-    //   }
-    // });
     
 
     app.use(adminRoute);

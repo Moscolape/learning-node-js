@@ -22,7 +22,7 @@
                 <p class="product-price">$<%= product.price %></p>
                 <p class="product-description"><%= product.description %></p>
                 <div class="button">
-                  <a href="/edit-product?productId=<%= product._id %>" class="add-to-cart-btn">Edit</a>
+                  <a href="/edit-product/<%= product._id %>" class="add-to-cart-btn">Edit</a>
                   <form action="/delete-product" method="POST" style="display: inline;">
                     <input type="hidden" name="productId" value="<%= product._id %>" />
                     <button type="submit" class="add-to-cart-btn">Delete</button>

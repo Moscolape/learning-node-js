@@ -8,10 +8,10 @@ const router = express.Router();
 router.get("/add-product", adminController.getAddProduct);
 
 // @ts-ignore
-router.get("/edit-product", adminController.editProduct);
+router.get("/edit-product/:productId", adminController.editProduct);
 
 // @ts-ignore
-router.post('/edit-product/:id', adminController.updateProduct);
+router.post('/edit-product/:productId', adminController.updateProduct);
 
 // @ts-ignore
 router.post("/delete-product", adminController.deleteProduct);
