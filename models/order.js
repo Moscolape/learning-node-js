@@ -7,8 +7,8 @@ const orderSchema = new Schema({
     {
       productId: { type: Schema.Types.ObjectId, ref: "Product", required: true },
       quantity: { type: Number, required: true },
-      title: { type: String, required: true },  // Optional, but good to include if you need the price in the order
-      price: { type: Number, required: true },  // Optional, but good to include if you need the price in the order
+      title: { type: String, required: true },
+      price: { type: Number, required: true }, 
     }
   ],
   user: {

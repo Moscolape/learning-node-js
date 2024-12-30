@@ -20,16 +20,6 @@ productSchema.statics.findById = function(id) {
   return this.find({ _id: id });
 };
 
-// productSchema.statics.findByIdAndDelete = function (prodId) {
-//   // @ts-ignore
-//   return this.findByIdAndDelete(prodId).exec();
-// };
-
-// productSchema.statics.findByIdAndUpdate = function (prodId, updatedData) {
-//   // @ts-ignore
-//   return this.findByIdAndUpdate(prodId, updatedData).exec();
-// };
-
 // Create and export the Product model
 const Product = mongoose.model("Product", productSchema);
 

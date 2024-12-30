@@ -10,6 +10,7 @@ exports.getAllProducts = async (req, res) => {
       docTitle: "Products",
       path: "/products",
       hasProduct: products.length > 0,
+      isAuthenticated: req.isLoggedIn
     });
   } catch (err) {
     console.error("Error fetching products:", err);
@@ -27,6 +28,7 @@ exports.getThisProduct = async (req, res) => {
       return res.status(404).render("not-found", {
         docTitle: "Product Not Found",
         path: "/not-found",
+        isAuthenticated: req.isLoggedIn
       });
     }
 
@@ -34,6 +36,7 @@ exports.getThisProduct = async (req, res) => {
       product,
       docTitle: product.title,
       path: `/products/${id}`,
+      isAuthenticated: req.isLoggedIn
     });
   } catch (err) {
     console.error("Error fetching product:", err);
@@ -50,6 +53,7 @@ exports.getIndex = async (req, res) => {
       docTitle: "Shop",
       path: "/",
       hasProduct: products.length > 0,
+      isAuthenticated: req.isLoggedIn
     });
   } catch (err) {
     console.error("Error fetching products:", err);
@@ -73,6 +77,7 @@ exports.getCart = async (req, res) => {
       docTitle: "Your Cart",
       products: cartProducts,
       totalPrice,
+      isAuthenticated: req.isLoggedIn
     });
   } catch (err) {
     console.error("Error fetching cart:", err);
@@ -137,6 +142,7 @@ exports.getOrders = async (req, res) => {
       path: "/orders",
       docTitle: "Your Orders",
       orders,
+      isAuthenticated: req.isLoggedIn
     });
   } catch (err) {
     console.error("Error fetching orders:", err);
@@ -149,5 +155,6 @@ exports.getCheckout = (req, res) => {
   res.render("shop/checkout", {
     docTitle: "Checkout",
     path: "/checkout",
+    isAuthenticated: req.isLoggedIn
   });
 };

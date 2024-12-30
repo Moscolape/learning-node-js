@@ -21,20 +21,27 @@
           >Orders</a
         >
       </li>
-      <li class="main-header__item">
-        <a
-          class="<%= path === '/add-product' ? 'active' : ''%>"
-          href="/add-product"
-          >Add Product</a
-        >
-      </li>
-      <li class="main-header__item">
-        <a
-          class="<%= path === '/all-products' ? 'active' : ''%>"
-          href="/all-products"
-          >Store</a
-        >
-      </li>
+      <% if (isAuthenticated) { %>
+        <li class="main-header__item">
+          <a
+            class="<%= path === '/add-product' ? 'active' : ''%>"
+            href="/add-product"
+            >Add Product</a
+          >
+        </li>
+        <li class="main-header__item">
+          <a
+            class="<%= path === '/all-products' ? 'active' : ''%>"
+            href="/all-products"
+            >Store</a
+          >
+        </li>
+      <% } %>
     </ul>
+    <ul class="main-header__item-list">
+      <li class="main-header__item">
+          <a class="<%= path === '/login' ? 'active' : '' %>" href="/login">Login</a>
+      </li>
+  </ul>
   </nav>
 </header>
