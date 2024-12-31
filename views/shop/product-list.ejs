@@ -23,10 +23,12 @@
                 <p class="product-description"><%= product.description %></p>
                 <div class="button">
                   <a href="/products/<%= product._id %>" class="add-to-cart-btn">Details</a>
-                  <form action="/carts" method="POST">
-                    <button type="submit" class="add-to-cart-btn">Add to Cart</button>
-                    <input type="hidden" name="productId" value="<%= product._id %>">
-                  </form>
+                  <% if (isAuthenticated) { %>
+                    <form action="/carts" method="POST">
+                      <button type="submit" class="add-to-cart-btn">Add to Cart</button>
+                      <input type="hidden" name="productId" value="<%= product._id %>">
+                    </form>
+                  <% } %>
                 </div>
               </div>
             </li>

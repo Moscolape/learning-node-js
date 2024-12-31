@@ -12,7 +12,6 @@ exports.getProducts = async (req, res) => {
       docTitle: "All Products",
       path: "/all-products",
       hasProduct: products.length > 0,
-      isAuthenticated: req.isLoggedIn
     });
   } catch (err) {
     console.error("Error fetching products:", err);
@@ -53,7 +52,6 @@ exports.getAddProduct = (req, res, next) => {
   res.render("admin/add-product", {
     docTitle: "Add Product",
     path: "/add-product",
-    isAuthenticated: req.isLoggedIn
   });
 };
 
@@ -82,7 +80,6 @@ exports.editProduct = async (req, res, next) => {
       // @ts-ignore
       docTitle: `Edit ${product[0].title}`,
       path: `/edit-product/${productId}`,
-      isAuthenticated: req.isLoggedIn
     });
   } catch (err) {
     console.error("Error fetching product for editing:", err);

@@ -11,17 +11,18 @@
           >Products</a
         >
       </li>
-      <li class="main-header__item">
-        <a class="<%= path === '/carts' ? 'active' : ''%>" href="/carts"
-          >Carts</a
-        >
-      </li>
-      <li class="main-header__item">
-        <a class="<%= path === '/orders' ? 'active' : ''%>" href="/orders"
-          >Orders</a
-        >
-      </li>
+      <!-- <p>Debug: isAuthenticated = <%= isAuthenticated %></p> -->
       <% if (isAuthenticated) { %>
+        <li class="main-header__item">
+          <a class="<%= path === '/carts' ? 'active' : ''%>" href="/carts"
+            >Carts</a
+          >
+        </li>
+        <li class="main-header__item">
+          <a class="<%= path === '/orders' ? 'active' : ''%>" href="/orders"
+            >Orders</a
+          >
+        </li>
         <li class="main-header__item">
           <a
             class="<%= path === '/add-product' ? 'active' : ''%>"
@@ -39,9 +40,17 @@
       <% } %>
     </ul>
     <ul class="main-header__item-list">
-      <li class="main-header__item">
+      <% if (isAuthenticated) { %>
+        <li class="main-header__item">
+          <form action="/logout" method="post">
+            <button type="submit">Logout</button>
+          </form>
+        </li>
+      <% } else { %>
+        <li class="main-header__item">
           <a class="<%= path === '/login' ? 'active' : '' %>" href="/login">Login</a>
-      </li>
-  </ul>
+        </li>
+      <% } %>
+    </ul>
   </nav>
 </header>

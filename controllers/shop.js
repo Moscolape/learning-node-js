@@ -10,7 +10,6 @@ exports.getAllProducts = async (req, res) => {
       docTitle: "Products",
       path: "/products",
       hasProduct: products.length > 0,
-      isAuthenticated: req.isLoggedIn
     });
   } catch (err) {
     console.error("Error fetching products:", err);
@@ -22,13 +21,12 @@ exports.getAllProducts = async (req, res) => {
 exports.getThisProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const product = await Product.findById(id); // Mongoose's findById replaces the custom method
+    const product = await Product.findById(id);
 
     if (!product) {
       return res.status(404).render("not-found", {
         docTitle: "Product Not Found",
         path: "/not-found",
-        isAuthenticated: req.isLoggedIn
       });
     }
 
@@ -36,7 +34,6 @@ exports.getThisProduct = async (req, res) => {
       product,
       docTitle: product.title,
       path: `/products/${id}`,
-      isAuthenticated: req.isLoggedIn
     });
   } catch (err) {
     console.error("Error fetching product:", err);
@@ -46,6 +43,8 @@ exports.getThisProduct = async (req, res) => {
 
 // Fetch all products for the index page
 exports.getIndex = async (req, res) => {
+  console.log(req.session.isLoggedIn);
+
   try {
     const products = await Product.find();
     return res.render("shop/index", {
@@ -53,7 +52,6 @@ exports.getIndex = async (req, res) => {
       docTitle: "Shop",
       path: "/",
       hasProduct: products.length > 0,
-      isAuthenticated: req.isLoggedIn
     });
   } catch (err) {
     console.error("Error fetching products:", err);
@@ -77,7 +75,6 @@ exports.getCart = async (req, res) => {
       docTitle: "Your Cart",
       products: cartProducts,
       totalPrice,
-      isAuthenticated: req.isLoggedIn
     });
   } catch (err) {
     console.error("Error fetching cart:", err);
@@ -89,7 +86,7 @@ exports.getCart = async (req, res) => {
 exports.addToCart = async (req, res) => {
   const { productId } = req.body;
 
-  console.log("Product ID received:", productId);  // Log productId to ensure it's not undefined
+  console.log("Product ID received:", productId);
 
   try {
     const product = await Product.findById(productId);
@@ -114,7 +111,8 @@ exports.removeCartItem = async (req, res) => {
   const { productId } = req.body;
 
   try {
-    await req.user.removeFromCart(productId); // Assumes `removeFromCart` is implemented in the User model
+    await req.user.removeFromCart(productId);
+    
     return res.redirect("/carts");
   } catch (err) {
     console.error("Error removing item from cart:", err);
@@ -142,7 +140,6 @@ exports.getOrders = async (req, res) => {
       path: "/orders",
       docTitle: "Your Orders",
       orders,
-      isAuthenticated: req.isLoggedIn
     });
   } catch (err) {
     console.error("Error fetching orders:", err);
@@ -155,6 +152,5 @@ exports.getCheckout = (req, res) => {
   res.render("shop/checkout", {
     docTitle: "Checkout",
     path: "/checkout",
-    isAuthenticated: req.isLoggedIn
   });
 };

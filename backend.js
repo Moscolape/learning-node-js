@@ -30,6 +30,11 @@ app.use(
   session({ secret: "my secret", resave: false, saveUnintialized: false, store: store })
 );
 
+app.use((req, res, next) => {
+  res.locals.isAuthenticated = req.session.isLoggedIn || false;
+  next();
+});
+
 // MongoDB Connection and Middleware
 connectToMongoDB()
   .then((db) => {
@@ -51,7 +56,7 @@ connectToMongoDB()
         next(err);
       }
     });
-
+    
     app.use(adminRoute);
     app.use(shopRoute);
     app.use(authRoute);

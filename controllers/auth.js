@@ -1,15 +1,21 @@
 exports.getLogin = (req, res, next) => {
-  // const isLoggedIn = req.get('Cookie').split(';')[2].trim().split('=')[1];
-  console.log(req.session);
-  res.render('auth/login', {
-    path: '/login',
-    docTitle: 'Login',
-    isAuthenticated: false
+  console.log(req.session.isLoggedIn);
+
+  res.render("auth/login", {
+    path: "/login",
+    docTitle: "Login",
+    isAuthenticated: req.session.isLoggedIn || false,
   });
 };
 
 exports.postLogin = (req, res, next) => {
-    // res.setHeader('Set-Cookie', 'loggedIn=true; HttpOnly');
-    req.session.isLoggedIn = true;
-    res.redirect('/');
-  };
+  req.session.isLoggedIn = true;
+  res.redirect("/");
+};
+
+exports.postLogout = (req, res, next) => {
+  req.session.destroy((err) => {
+    console.log(err);
+    res.redirect("/login");
+  });
+};
