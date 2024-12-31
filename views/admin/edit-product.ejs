@@ -9,6 +9,7 @@
   <form class="product-form" action="/edit-product/<%= product[0]._id %>" method="POST">
 
     <input type="hidden" name="productId" value="<%= product[0]._id %>">
+    <input type="hidden" name="_csrf" value="<%= _csrf %>">
     
     <div class="form-control">
       <label for="title">Title</label>

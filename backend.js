@@ -4,6 +4,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
+const csrf = require("csurf");
 
 const { connectToMongoDB } = require("./utils/mongodb");
 const User = require("./models/user");
@@ -13,8 +14,9 @@ const errorController = require("./controllers/error");
 const app = express();
 const store = new MongoDBStore({
   uri: "mongodb+srv://Moscolian:ilovedherin2019@cluster0.cz0tz.mongodb.net/shop",
-  collection: "sessions"
+  collection: "sessions",
 });
+const csrfProtection = csrf();
 
 app.set("view engine", "ejs");
 app.set("views", "views");
@@ -27,11 +29,18 @@ const authRoute = require("./routes/auth");
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(
-  session({ secret: "my secret", resave: false, saveUnintialized: false, store: store })
+  session({
+    secret: "my secret",
+    resave: false,
+    saveUnintialized: false,
+    store: store,
+  })
 );
+app.use(csrfProtection);
 
 app.use((req, res, next) => {
   res.locals.isAuthenticated = req.session.isLoggedIn || false;
+  res.locals._csrf = req.csrfToken();
   next();
 });
 
@@ -45,18 +54,24 @@ connectToMongoDB()
       next();
     });
 
-    // @ts-ignore
     app.use(async (req, res, next) => {
       try {
-        const user = await User.findById("676e9e0075593858b2dc6fb9");
-        req.user = user;
+        if (!req.session.userId) {
+          return next();
+        }
+
+        const user = await User.findById(req.session.userId);
+        if (user) {
+          req.user = user;
+          req.session.user = { id: user._id, email: user.email };
+        }
         next();
       } catch (err) {
-        console.error("Error setting user in request:", err);
+        console.error("Error fetching user for session:", err);
         next(err);
       }
     });
-    
+
     app.use(adminRoute);
     app.use(shopRoute);
     app.use(authRoute);

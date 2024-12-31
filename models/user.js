@@ -4,8 +4,8 @@ const Schema = mongoose.Schema;
 
 // Define the User schema
 const userSchema = new Schema({
-  name: { type: String, required: true },
   email: { type: String, required: true },
+  password: { type: String, required: true },
   cart: {
     items: [
       {
@@ -92,7 +92,7 @@ userSchema.methods.addOrder = async function () {
       // @ts-ignore
       _id: this._id,
       // @ts-ignore
-      name: this.name,
+      email: this.email,
     },
   });
 

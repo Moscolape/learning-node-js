@@ -23,6 +23,7 @@
                 <p class="product-description"><%= product.description %></p>
                 <% if (isAuthenticated) { %>
                   <form action="/carts" method="POST">
+                    <input type="hidden" name="_csrf" value="<%= _csrf %>">
                     <button type="submit" class="add-to-cart-btn">Add to Cart</button>
                     <input type="hidden" name="productId" value="<%= product._id %>">
                   </form>              

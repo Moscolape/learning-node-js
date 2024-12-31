@@ -9,6 +9,8 @@
 
     <main>
         <form class="login-form" action="/login" method="POST">
+            <p style="color: red;"><%= errorMessage %></p>
+            <input type="hidden" name="_csrf" value="<%= _csrf %>">
             <div class="form-control">
                 <label for="email">E-Mail</label>
                 <input type="email" name="email" id="email">

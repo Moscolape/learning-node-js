@@ -1,6 +1,7 @@
 const express = require("express");
 
 const shopController = require("../controllers/shop");
+const isProtected = require("../middleware/isProtected");
 
 const router = express.Router();
 
@@ -14,7 +15,7 @@ router.get("/products", shopController.getAllProducts);
 router.get("/products/:id", shopController.getThisProduct);
 
 // @ts-ignore
-router.get("/carts", shopController.getCart);
+router.get("/carts", isProtected, shopController.getCart);
 
 // @ts-ignore
 router.post("/carts", shopController.addToCart);
@@ -26,7 +27,7 @@ router.post("/remove-from-cart", shopController.removeCartItem);
 router.post("/create-order", shopController.postOrder);
 
 // @ts-ignore
-router.get("/orders", shopController.getOrders);
+router.get("/orders", isProtected, shopController.getOrders);
 
 // @ts-ignore
 router.get("/checkout", shopController.getCheckout);

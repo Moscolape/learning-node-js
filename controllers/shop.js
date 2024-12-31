@@ -51,7 +51,7 @@ exports.getIndex = async (req, res) => {
       products,
       docTitle: "Shop",
       path: "/",
-      hasProduct: products.length > 0,
+      hasProduct: products.length > 0
     });
   } catch (err) {
     console.error("Error fetching products:", err);
@@ -134,6 +134,11 @@ exports.postOrder = async (req, res) => {
 
 // Fetch all orders
 exports.getOrders = async (req, res) => {
+  if (!req.user) {
+    console.error("User not found in request.");
+    return res.status(401).json({ message: "User not logged in or does not exist." });
+  }
+
   try {
     const orders = await req.user.getOrders(); // Assumes `getOrders` is implemented in the User model
     return res.render("shop/orders", {

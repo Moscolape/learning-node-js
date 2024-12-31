@@ -24,6 +24,7 @@
                 <div class="button">
                   <a href="/edit-product/<%= product._id %>" class="add-to-cart-btn">Edit</a>
                   <form action="/delete-product" method="POST" style="display: inline;">
+                    <input type="hidden" name="_csrf" value="<%= _csrf %>">
                     <input type="hidden" name="productId" value="<%= product._id %>" />
                     <button type="submit" class="add-to-cart-btn">Delete</button>
                   </form>

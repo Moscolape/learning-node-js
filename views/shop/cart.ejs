@@ -14,18 +14,21 @@
               <%= product.title %> (<%= product.quantity %>) - $<%= product.price %>
               <div class="quantity-controls">
                 <form action="/carts" method="POST">
+                  <input type="hidden" name="_csrf" value="<%= _csrf %>">
                   <input type="hidden" name="productId" value="<%= product._id %>">
                   <input type="hidden" name="action" value="decrease">
                   <button type="submit" <%= product.quantity === 1 ? 'disabled' : '' %>>-</button>
                 </form>
                 <form action="/carts" method="POST">
                   <input type="hidden" name="productId" value="<%= product._id %>">
+                  <input type="hidden" name="_csrf" value="<%= _csrf %>">
                   <input type="hidden" name="action" value="increase">
                   <button type="submit">+</button>
                 </form>                              
               </div>
               <form action="/remove-from-cart" method="POST">
                 <input type="hidden" name="productId" value="<%= product._id %>">
+                <input type="hidden" name="_csrf" value="<%= _csrf %>">
                 <button type="submit">Remove</button>
               </form>
             </li>
@@ -35,7 +38,8 @@
         <br />
         <div style="display: flex; justify-content: center;">
             <form action="/create-order" method="POST">
-                <button type="submit" class="btn">Order Now!</button>
+              <input type="hidden" name="_csrf" value="<%= _csrf %>">
+              <button type="submit" class="btn">Order Now!</button>
             </form>
         </div>
       <% } else { %>
