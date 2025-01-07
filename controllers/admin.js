@@ -1,11 +1,12 @@
 const Product = require("../models/products");
+const { validationResult } = require("express-validator");
 
-
-// @ts-ignore
 // @ts-ignore
 exports.getProducts = async (req, res) => {
   try {
-    const products = await Product.find();
+    const userId = req.user._id;
+
+    const products = await Product.find({ userId });
 
     return res.render("admin/all-products", {
       products,
@@ -22,36 +23,61 @@ exports.getProducts = async (req, res) => {
 
 // @ts-ignore
 exports.postAddProduct = async (req, res) => {
-  try {
-    const { title, imageUrl, price, description } = req.body;
+  const errors = validationResult(req);
 
-    // Create a new product instance and save it using the MongoDB model
+  if (!errors.isEmpty()) {
+    return res.status(422).render("admin/add-product", {
+      docTitle: "Add Product",
+      path: "/add-product",
+      errorMessage: errors.array()[0].msg,
+      oldInput: { ...req.body },
+      validationErrors: errors.array(),
+    });
+  }
+
+  const { title, price, description } = req.body;
+  const image = req.file;
+
+  if (!image) {
+    return res.status(422).render("admin/add-product", {
+      docTitle: "Add Product",
+      path: "/add-product",
+      errorMessage: "Attached file is not an image.",
+      oldInput: { ...req.body },
+      validationErrors: [],
+    });
+  }
+
+  const imagePath = image.path.replace(/\\/g, "/");
+  console.log(image);
+
+  try {
     const product = new Product({
       title,
       price,
       description,
-      imageUrl,
+      image: imagePath,
       userId: req.user._id,
     });
+
     await product.save();
 
     console.log("Product created:", product);
-
     return res.status(201).redirect("/all-products");
   } catch (err) {
     console.error("Error saving product:", err);
-    return res
-      .status(500)
-      .json({ message: "Error saving product", error: err.message });
+    return res.status(500).json({ message: "Error saving product", error: err.message });
   }
 };
 
-// @ts-ignore
+
 // @ts-ignore
 exports.getAddProduct = (req, res, next) => {
   res.render("admin/add-product", {
     docTitle: "Add Product",
     path: "/add-product",
+    errorMessage: "",
+    oldInput: {...req.body}
   });
 };
 
@@ -67,12 +93,16 @@ exports.editProduct = async (req, res, next) => {
 
   try {
     const product = await Product.findById(productId);
+    console.log(product);
+    // @ts-ignore
+    console.log(product[0]._id);
+    // @ts-ignore
+    console.log(product[0]._id.toString());
 
-    console.log(product)
-
-    // if (!product) {
-    //   return res.redirect("/all-products");
-    // }
+    // @ts-ignore
+    if (product[0]?.userId.toString() !== req.user._id.toString()) {
+      return res.redirect("/all-products");
+    }
 
     // Render the edit-product page with the fetched product
     res.render("admin/edit-product", {
@@ -80,6 +110,8 @@ exports.editProduct = async (req, res, next) => {
       // @ts-ignore
       docTitle: `Edit ${product[0].title}`,
       path: `/edit-product/${productId}`,
+      // @ts-ignore
+      productId: product[0]._id.toString()
     });
   } catch (err) {
     console.error("Error fetching product for editing:", err);
@@ -88,28 +120,53 @@ exports.editProduct = async (req, res, next) => {
 };
 
 exports.updateProduct = async (req, res) => {
-  console.log("Update product function called");
-  const { productId } = req.params; // Use `req.params` to get the `productId` from the URL
-  const { title, imageUrl, price, description } = req.body;
+  const errors = validationResult(req);
+  const productId = req.params.productId;
+  const image = req.file;
 
-  console.log('Product ID:', productId);
-  console.log('Form Data:', req.body);
+  if (!errors.isEmpty()) {
+    const { title, price, description } = req.body;
 
-  const updatedData = { title, imageUrl, price, description };
+    return res.status(422).render("admin/edit-product", {
+      product: { _id: productId, title, price, description },
+      docTitle: "Edit Product",
+      path: `/edit-product/${productId}`,
+      errorMessage: errors.array()[0].msg,
+      validationErrors: errors.array(),
+    });
+  }
 
   try {
-    const result = await Product.findByIdAndUpdate(productId, updatedData, { new: true });
+    const { title, price, description } = req.body;
 
-    console.log('Update result:', result);
+    const updatedData = {
+      title,
+      price,
+      description,
+    };
 
-    if (!result) {
-      return res.status(404).json({ message: "Product not found or no changes made" });
+    if (image) {
+      console.log("Uploaded file:", image); // Debug log
+      updatedData.image = image.path.replace(/\\/g, "/");
+    } else {
+      console.log("No image uploaded.");
     }
 
+    const updatedProduct = await Product.findByIdAndUpdate(
+      productId,
+      updatedData,
+      { new: true }
+    );
+
+    if (!updatedProduct) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    console.log("Product updated:", updatedProduct);
     res.status(200).redirect("/all-products");
   } catch (err) {
     console.error("Error updating product:", err);
-    res.status(500).json({ message: "Error updating product" });
+    res.status(500).json({ message: "Error updating product", error: err.message });
   }
 };
 

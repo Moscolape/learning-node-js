@@ -2,6 +2,7 @@ const transporter = require("../utils/email");
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
+const { validationResult } = require("express-validator");
 
 
 exports.getLogin = (req, res, next) => {
@@ -75,12 +76,14 @@ exports.postLogin = (req, res, next) => {
 
 exports.postSignup = (req, res, next) => {
   const { email, password, confirmPassword } = req.body;
+  const errors = validationResult(req);
 
-  if (password !== confirmPassword) {
-    return res.status(400).render("auth/signup", {
+  if (!errors.isEmpty()) {
+    const err = errors.array();
+    return res.status(422).render("auth/signup", {
       path: "/signup",
       docTitle: "Signup",
-      errorMessage: "Passwords do not match.",
+      errorMessage: err[0].msg,
       isAuthenticated: false,
     });
   }
@@ -94,7 +97,17 @@ exports.postSignup = (req, res, next) => {
     });
   }
 
-  User.findOne({ email: email })
+  if (password !== confirmPassword) {
+    return res.status(400).render("auth/signup", {
+      path: "/signup",
+      docTitle: "Signup",
+      errorMessage: "Passwords do not match.",
+      isAuthenticated: false,
+    });
+  }
+
+
+  User.findOne({ email: email.trim() })
     .then((userDoc) => {
       if (userDoc) {
         return res.status(400).render("auth/signup", {
@@ -109,7 +122,7 @@ exports.postSignup = (req, res, next) => {
     })
     .then((hashedPassword) => {
       const user = new User({
-        email: email,
+        email: email.trim(),
         password: hashedPassword,
         cart: { items: [] },
       });
