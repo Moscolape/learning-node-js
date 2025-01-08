@@ -8,7 +8,7 @@
     <ul>
       <li>
         <img
-          src="<%= product[0].imageUrl %>"
+          src="/<%= product[0].image %>"
           alt="product-watch"
           class="product-image"
         />
@@ -20,7 +20,7 @@
             <form action="/carts" method="POST">
               <input type="hidden" name="_csrf" value="<%= _csrf %>">
               <button type="submit" class="add-to-cart-btn">Add to Cart</button>
-              <input type="hidden" name="productId" value="<%= product.id %>">
+              <input type="hidden" name="productId" value="<%= product[0]._id %>">
             </form>
           <% } %>
         </div>

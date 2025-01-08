@@ -1,4 +1,6 @@
 const Product = require("../models/products");
+const fileHelper = require("../utils/file");
+
 const { validationResult } = require("express-validator");
 
 // @ts-ignore
@@ -146,7 +148,8 @@ exports.updateProduct = async (req, res) => {
     };
 
     if (image) {
-      console.log("Uploaded file:", image); // Debug log
+      console.log("Uploaded file:", image);
+      fileHelper.deleteFile(image.path);
       updatedData.image = image.path.replace(/\\/g, "/");
     } else {
       console.log("No image uploaded.");
@@ -175,16 +178,27 @@ exports.deleteProduct = async (req, res) => {
   const { productId } = req.body;
 
   try {
-    const result = await Product.findByIdAndDelete(productId);
+    // Fetch the product by ID
+    const product = await Product.findById(productId);
 
-    // @ts-ignore
-    if (result.deletedCount === 0) {
+    if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
 
+    // Delete the product's image from the filesystem
+    if (product.image) {
+      fileHelper.deleteFile(product.image);
+    }
+
+    // Delete the product from the database
+    await Product.findByIdAndDelete(productId);
+
+    console.log(`Product with ID ${productId} deleted.`);
+    console.log(product);
+    console.log(product.image);
     res.status(200).redirect("/all-products");
   } catch (err) {
     console.error("Error deleting product:", err);
-    res.status(500).json({ message: "Error deleting product" });
+    res.status(500).json({ message: "Error deleting product", error: err.message });
   }
 };

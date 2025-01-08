@@ -29,6 +29,8 @@ router.post("/create-order", shopController.postOrder);
 // @ts-ignore
 router.get("/orders", isProtected, shopController.getOrders);
 
+router.get("/orders/:orderId", isProtected, shopController.getInvoice);
+
 // @ts-ignore
 router.get("/checkout", shopController.getCheckout);
 
