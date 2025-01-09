@@ -183,6 +183,42 @@ main li:hover {
   transform: translateY(-2px);
 }
 
+.pagination {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  list-style: none;
+  padding: 0;
+}
+
+.pagination a, .pagination button {
+  text-decoration: none;
+  display: inline-block;
+  color: #388e3c;
+  font-weight: bold;
+  padding: 0.5rem 0.75rem;
+  margin: 0 0.25rem; /* Combine margin-left and margin-right for cleaner code */
+  border: 1px solid #388e3c;
+  border-radius: 5px;
+  transition: background-color 0.3s, color 0.3s; /* Smooth hover effect */
+}
+
+.pagination a:hover, .pagination button:hover {
+  background-color: #388e3c;
+  color: white;
+  cursor: pointer;
+}
+
+.pagination li.active a {
+  background-color: #388e3c;
+  color: white;
+  border-color: #388e3c; /* Match border color with the active state */
+  pointer-events: none; /* Disable clicking on the active page */
+}
+
+
 /* Responsive Design */
 @media (max-width: 768px) {
   main {

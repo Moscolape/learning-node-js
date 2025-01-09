@@ -3,18 +3,39 @@ const fileHelper = require("../utils/file");
 
 const { validationResult } = require("express-validator");
 
+const ITEMS_PER_PAGE = 1;
+
 // @ts-ignore
 exports.getProducts = async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+
   try {
     const userId = req.user._id;
 
-    const products = await Product.find({ userId });
+    // Count total number of products for the user
+    const totalProducts = await Product.countDocuments({ userId });
 
+    // Fetch paginated products
+    const products = await Product.find({ userId })
+      .skip((page - 1) * ITEMS_PER_PAGE)
+      .limit(ITEMS_PER_PAGE);
+
+    // Calculate total pages
+    const totalPages = Math.ceil(totalProducts / ITEMS_PER_PAGE);
+
+    // Render the page with additional data
     return res.render("admin/all-products", {
       products,
       docTitle: "All Products",
       path: "/all-products",
       hasProduct: products.length > 0,
+      totalProducts,
+      currentPage: page,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1,
+      nextPage: page < totalPages ? page + 1 : null,
+      previousPage: page > 1 ? page - 1 : null,
     });
   } catch (err) {
     console.error("Error fetching products:", err);
@@ -175,7 +196,7 @@ exports.updateProduct = async (req, res) => {
 
 
 exports.deleteProduct = async (req, res) => {
-  const { productId } = req.body;
+  const { productId } = req.params;
 
   try {
     // Fetch the product by ID
@@ -194,9 +215,8 @@ exports.deleteProduct = async (req, res) => {
     await Product.findByIdAndDelete(productId);
 
     console.log(`Product with ID ${productId} deleted.`);
-    console.log(product);
-    console.log(product.image);
-    res.status(200).redirect("/all-products");
+    res.status(200).json({message: "deleted successfully"});
+    // res.status(200).redirect("/all-products");
   } catch (err) {
     console.error("Error deleting product:", err);
     res.status(500).json({ message: "Error deleting product", error: err.message });

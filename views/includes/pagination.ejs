@@ -1,0 +1,19 @@
+<% if (totalPages > 1) { %>
+  <section>
+    <ul class="pagination">
+      <% if (hasPreviousPage) { %>
+        <li>
+          <a href="?page=<%= previousPage %>">Previous</a>
+        </li>
+      <% } %>
+      <li class="active">
+        <a href="?page=<%= currentPage %>"><%= currentPage %></a>
+      </li>
+      <% if (hasNextPage) { %>
+        <li>
+          <a href="?page=<%= nextPage %>">Next</a>
+        </li>
+      <% } %>
+    </ul>
+  </section>        
+<% } %>    

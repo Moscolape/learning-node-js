@@ -32,6 +32,6 @@ router.get("/orders", isProtected, shopController.getOrders);
 router.get("/orders/:orderId", isProtected, shopController.getInvoice);
 
 // @ts-ignore
-router.get("/checkout", shopController.getCheckout);
+// router.get("/checkout", isProtected, shopController.getCheckout);
 
 module.exports = router;

@@ -23,19 +23,22 @@
                 <p class="product-description"><%= product.description %></p>
                 <div class="button">
                   <a href="/edit-product/<%= product._id %>" class="add-to-cart-btn">Edit</a>
-                  <form action="/delete-product" method="POST" style="display: inline;">
-                    <input type="hidden" name="_csrf" value="<%= _csrf %>">
+                  <!-- <form action="/delete-product" method="POST" style="display: inline;"> -->
                     <input type="hidden" name="productId" value="<%= product._id %>" />
-                    <button type="submit" class="add-to-cart-btn">Delete</button>
-                  </form>
+                    <input type="hidden" name="_csrf" value="<%= _csrf %>">
+                    <button type="submit" class="add-to-cart-btn" onclick="deleteProduct(this)">Delete</button>
+                  <!-- </form> -->
                 </div>
               </div>
             </li>
           <% } %>
         </ul>
       </main>
+      <%- include('../includes/pagination.ejs') %>
+
     <% } else { %>
       <h2>No Products</h2>
       <p>Sorry, there are no products available at the moment.</p>
     <% } %>
 <%- include('../includes/end.ejs') %>
+<script src="/js/admin.js"></script>

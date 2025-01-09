@@ -4,25 +4,51 @@ const Order = require("../models/order");
 const fs = require("fs");
 const path = require("path");
 
+// @ts-ignore
+const stripe = require('stripe')('sk_test_51MKWKZL62I7919FYJvHeGUQrDDkqq5E8Q98S4ZcElvyDMfBHQEdPDw1HRVZmx1IH5FmLUfnOdjOCYTi22IUNSJkO00VxrHFkPa');
+
+
 const PDFDocument = require("pdfkit");
+const { getProducts } = require("./admin");
+
+const ITEMS_PER_PAGE = 2;
 
 // Fetch all products
-// @ts-ignore
 exports.getAllProducts = async (req, res) => {
-  try {
-    const products = await Product.find();
+  const page = parseInt(req.query.page) || 1;
 
+  try {
+    // Count total number of products in the database
+    const totalProducts = await Product.countDocuments();
+
+    // Fetch paginated products
+    const products = await Product.find()
+      .skip((page - 1) * ITEMS_PER_PAGE)
+      .limit(ITEMS_PER_PAGE);
+
+    // Calculate total pages
+    const totalPages = Math.ceil(totalProducts / ITEMS_PER_PAGE);
+
+    // Render the page with additional data
     return res.render("shop/product-list", {
       products,
       docTitle: "Products",
       path: "/products",
       hasProduct: products.length > 0,
+      totalProducts,
+      currentPage: page,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1,
+      nextPage: page < totalPages ? page + 1 : null,
+      previousPage: page > 1 ? page - 1 : null,
     });
   } catch (err) {
     console.error("Error fetching products:", err);
     return res.status(500).json({ message: "Error fetching products" });
   }
 };
+
 
 // Fetch a single product by ID
 exports.getThisProduct = async (req, res) => {
@@ -50,15 +76,33 @@ exports.getThisProduct = async (req, res) => {
 
 // Fetch all products for the index page
 exports.getIndex = async (req, res) => {
-  console.log(req.session.isLoggedIn);
+  const page = parseInt(req.query.page) || 1;
 
   try {
-    const products = await Product.find();
+    // Count total number of products in the database
+    const totalProducts = await Product.countDocuments();
+
+    // Fetch paginated products
+    const products = await Product.find()
+      .skip((page - 1) * ITEMS_PER_PAGE)
+      .limit(ITEMS_PER_PAGE);
+
+    // Calculate total pages
+    const totalPages = Math.ceil(totalProducts / ITEMS_PER_PAGE);
+
+    // Render the page with additional data
     return res.render("shop/index", {
       products,
       docTitle: "Shop",
       path: "/",
       hasProduct: products.length > 0,
+      totalProducts,
+      currentPage: page,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1,
+      nextPage: page < totalPages ? page + 1 : null,
+      previousPage: page > 1 ? page - 1 : null
     });
   } catch (err) {
     console.error("Error fetching products:", err);
@@ -226,10 +270,39 @@ exports.getInvoice = async (req, res, next) => {
 };
 
 // Checkout page
-// @ts-ignore
-exports.getCheckout = (req, res) => {
-  res.render("shop/checkout", {
-    docTitle: "Checkout",
-    path: "/checkout",
-  });
-};
+// exports.getCheckout = async (req, res) => {
+//   const YOUR_DOMAIN = 'http://localhost:4000';
+
+//   try {
+//     const cartProducts = await req.user.getCart();
+//     console.log(cartProducts);
+
+//     let totalPrice = 0;
+//     cartProducts.forEach((product) => {
+//       totalPrice += product.price * product.quantity;
+//     });
+
+//     const session = await stripe.checkout.sessions.create({
+//       line_items: cartProducts.map(p => {
+//         return {
+//           price: p._id.toString()
+//         }
+//       }),
+//       mode: 'payment',
+//       success_url: `${YOUR_DOMAIN}/success.html`,
+//       cancel_url: `${YOUR_DOMAIN}/cancel.html`,
+//       payment_method_types: ['card']
+//     });
+    
+//     return res.render("shop/checkout", {
+//       docTitle: "Checkout",
+//       path: "/checkout",
+//       products: cartProducts,
+//       totalPrice,
+//       sessionId: session.id
+//     });
+//   } catch (err) {
+//     console.error("Error fetching cart:", err);
+//     return res.status(500).json({ message: "Error fetching cart." });
+//   }
+// };

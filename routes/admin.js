@@ -38,7 +38,8 @@ router.post(
 );
 
 // @ts-ignore
-router.post("/delete-product", adminController.deleteProduct);
+// router.post("/delete-product", adminController.deleteProduct);
+router.delete("/delete-product/:productId", isProtected, adminController.deleteProduct);
 
 // @ts-ignore
 router.post(
